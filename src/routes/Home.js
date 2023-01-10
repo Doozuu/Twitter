@@ -9,12 +9,12 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
-import { reload } from "firebase/auth";
 import Tweet from "components/Tweet";
 
 const Home = ({ userObj }) => {
   const [tweet, setTweet] = useState("");
   const [tweets, setTweets] = useState([]);
+  const [attachment, setAttachment] = useState();
   useEffect(() => {
     const q = query(collection(dbService, "tweets"), orderBy("createdAt"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -52,7 +52,22 @@ const Home = ({ userObj }) => {
     } = event;
     setTweet(value);
   };
-
+  const onFileChange = (event) => {
+    const {
+      target: { files },
+    } = event;
+    const theFile = files[0];
+    const reader = new FileReader();
+    reader.onloadend = (finishedEvent) => {
+      console.log(finishedEvent);
+      const {
+        currentTarget: { result },
+      } = finishedEvent;
+      setAttachment(result);
+    };
+    reader.readAsDataURL(theFile);
+  };
+  const onClearAttachment = () => setAttachment(null);
   return (
     <div>
       <form onSubmit={onSubmit}>
@@ -63,7 +78,19 @@ const Home = ({ userObj }) => {
           maxLength={120}
           value={tweet}
         />
-        <input onChange={onChange} type="submit" value="tweet" />
+        <input type="file" accept="image/*" onChange={onFileChange}></input>
+        <input type="submit" value="tweet" />
+        {attachment && (
+          <div>
+            <img
+              src={attachment}
+              alt="preview"
+              width="50px"
+              height="50px"
+            ></img>
+            <button onClick={onClearAttachment}>Clear</button>
+          </div>
+        )}
       </form>
       <div>
         {tweets.map((tweet) => (
