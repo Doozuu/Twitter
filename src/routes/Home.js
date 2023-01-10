@@ -1,36 +1,46 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { dbService } from "fbase";
-import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  getDocs,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import { reload } from "firebase/auth";
+import Tweet from "components/Tweet";
 
-const Home = () => {
+const Home = ({ userObj }) => {
   const [tweet, setTweet] = useState("");
   const [tweets, setTweets] = useState([]);
-  const getTweets = async () => {
-    const q = query(collection(dbService, "tweets"));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      const tweetObj = {
-        ...doc.data(),
-        id: doc.id,
-      };
-      setTweets((prev) => [tweetObj, ...prev]);
-    });
-  };
   useEffect(() => {
-    getTweets();
+    const q = query(collection(dbService, "tweets"), orderBy("createdAt"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const newArray = querySnapshot.docs.map((doc) => {
+        return {
+          id: doc.id,
+          ...doc.data(),
+        };
+      });
+      setTweets(newArray);
+      console.log("Current tweets in CA: ", newArray);
+    });
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const onSubmit = async (event) => {
     event.preventDefault();
     try {
       const docRef = await addDoc(collection(dbService, "tweets"), {
-        tweet,
+        text: tweet,
         createdAt: Date.now(),
+        creatorId: userObj.uid,
       });
       setTweet(""); // 입력창 비우기
-      window.location.reload(); // 새로고침
       console.log("Document written with ID: ", docRef.id);
     } catch (error) {
       console.log("Error adding document", error);
@@ -57,7 +67,11 @@ const Home = () => {
       </form>
       <div>
         {tweets.map((tweet) => (
-          <h4 key={tweet.id}>{tweet.tweet}</h4>
+          <Tweet
+            key={tweet.id}
+            tweetObj={tweet}
+            isOwner={tweet.creatorId === userObj.uid} // 내가 쓴 것만 지우거나 수정할 수 있게
+          />
         ))}
       </div>
     </div>
