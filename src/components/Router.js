@@ -3,20 +3,19 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "routes/Auth";
 import Home from "routes/Home";
 import Navigation from "./Navigation";
-// import EditProfile from "../routes/EditProfile";
 import Profile from "../routes/Profile";
 
-function AppRouter({ isLoggedIn, userObj }) {
+function AppRouter({ refreshUser, isLoggedIn, userObj }) {
   return (
     <BrowserRouter>
-      {isLoggedIn && <Navigation />}
+      {isLoggedIn && <Navigation userObj={userObj} />}
       <Routes>
         {isLoggedIn ? (
           <>
             <Route path="/" element={<Home userObj={userObj} />}></Route>
             <Route
               path="/profile"
-              element={<Profile userObj={userObj} />}
+              element={<Profile refreshUser={refreshUser} userObj={userObj} />}
             ></Route>
           </>
         ) : (
