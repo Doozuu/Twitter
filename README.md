@@ -6,6 +6,3 @@
 ### 추가할 기능 : 좋아요, 댓글, 글 저장, 검색, 팔로우
 
 firebase Auth, firestore, firebase storage 사용.
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuratio대
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
